@@ -11,7 +11,7 @@
 function netstorage_drush_command() {
   $items = array();
 
-  $items['netstorage-get-sync-command'] = array(
+  $items['netstorage-get-rsync-command'] = array(
     'description' => "Prints a command to manually rsync a single file to Akamai's NetStorage.",
     'arguments' => array(
       'filepath' => 'path/to/file to be synced',
@@ -40,7 +40,7 @@ function netstorage_drush_help($section) {
  *
  * @see netstorage_drush_command()
  */
-function drush_netstorage_get_sync_command($file) {
+function drush_netstorage_get_rsync_command($file) {
   // @todo Get absolute path to the file here?
   // @todo Do some sort of validation?
   // @todo Throw an error if NetStorage creds aren't available.
@@ -59,9 +59,9 @@ function drush_netstorage_get_sync_command($file) {
 
   // @todo If variables are not stored in settings.php, prompt user to input
   //   from command line.
-  $netstorage_rsync_variables = variable_get('netstorage_rsync_variables', FALSE);
+  $netstorage_credentials = variable_get('netstorage_credentials', FALSE);
 
-  $command = _drush_netstorage_get_sync_command($file, $netstorage_rsync_variables);
+  $command = _drush_netstorage_get_rsync_command($file, $netstorage_credentials);
   drush_print($command);
 }
 
@@ -71,7 +71,7 @@ function drush_netstorage_get_sync_command($file) {
  * @param string $filepath
  *   The path to the file to be updated.
  *
- * @param array $netstorage_rsync_variables
+ * @param array $netstorage_credentials
  *   An array of NetStorage rsync variables containing the follow key-value
  *   pairs:
  *   - "%key_file": The path to your NetStorage key file.
@@ -85,7 +85,7 @@ function drush_netstorage_get_sync_command($file) {
  *
  * @see drush_netstorage_get_sync_command()
  */
-function _drush_netstorage_get_sync_command($filepath, $netstorage_rsync_variables) {
+function _drush_netstorage_get_rsync_command($filepath, $netstorage_credentials) {
 
   $filename = '@todo';
   $rsynch_opts = '-ltgoDzdW --timeout=480';
@@ -97,7 +97,7 @@ function _drush_netstorage_get_sync_command($filepath, $netstorage_rsync_variabl
     '%rsync_options' => $rsynch_opts,
   );
 
-  $rsync_vars = array_merge($netstorage_rsync_variables, $file_info);
+  $rsync_vars = array_merge($netstorage_credentials, $file_info);
 
   // Generate the rsync against the file.
   $command = strtr("rsync -e 'ssh -qi %key_file' %rsync_options %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $rsync_vars);
