@@ -48,15 +48,21 @@ function netstorage_drush_help($section) {
  *  file.
  */
 function drush_netstorage_get_sync_command($file) {
-  // TODO Get absolute path to the file here?
-  // TODO Do some sort of validation?
-  // TODO Throw an error if NetStorage creds aren't available.
-  // TODO Throw and error if NetStorage creds aren't valid.
-  drush_print('NOTE: This is a work in progress. Probably still requires some testing and debugging. See README for instructions on what NetStorage creds need to be stored in settings.php. Then test out the command to make sure it works.');
+  // Get absolute path to file.
+  if (!file_exists($file)) {
+    drush_print('Sorry. This file does not exist: ' . $file);
+    return;
+  }
+  else {
+    $file = realpath($file);
+    drush_print("Now \$file is this $file");
+  }
 
-  // TODO If variables are not stored in settings.php, prompt user to input from
-  //   command line.
-  $netstorage_rsync_variables = variable_get('netstorage_rsync_variables', FALSE);
+  // Make sure variables aren't missing.
+  if (!$netstorage_rsync_variables = variable_get('netstorage_rsync_variables', FALSE)) {
+    drush_print('Missing netstorage_rsync_variables. See netstorage/README.');
+    return;
+  }
 
   $command = _drush_netstorage_get_sync_command($file, $netstorage_rsync_variables);
   drush_print($command);
@@ -66,7 +72,7 @@ function drush_netstorage_get_sync_command($file) {
  * Call this for drush commands updating NetStorage for individual files.
  *
  * @param string $filepath
- *  File name
+ *  Absolute path to file.
  *
  * @param array $netstorage_rsync_variables
  *    $conf['netstorage_rsync_variables'] = array(
@@ -82,14 +88,10 @@ function drush_netstorage_get_sync_command($file) {
  *  file.
  */
 function _drush_netstorage_get_sync_command($filepath, $netstorage_rsync_variables) {
-  
-  $filename = 'TODO';
   $rsynch_opts = '-ltgoDzdW --timeout=480';
-  $files_path = 'TODO';
 
   $file_info = array(
-    '%filename' => $filename,
-    '%files_path' => $files_path,
+    '%filename' => $filepath,
     '%rsync_options' => $rsynch_opts,
   );
 
