@@ -41,11 +41,6 @@ function netstorage_drush_help($section) {
  * @see netstorage_drush_command()
  */
 function drush_netstorage_get_rsync_command($file) {
-  // @todo Get absolute path to the file here?
-  // @todo Do some sort of validation?
-  // @todo Throw an error if NetStorage creds aren't available.
-  // @todo Throw and error if NetStorage creds aren't valid.
-  drush_print('NOTE: This is a work in progress. Probably still requires some testing and debugging. See README for instructions on what NetStorage creds need to be stored in settings.php. Then test out the command to make sure it works.');
   // Get absolute path to file.
   $file = (substr($file, 0, 1) == '/') ? $file : $_ENV['PWD'] . '/' . $file;
   if (!file_exists($file)) {
@@ -85,15 +80,12 @@ function drush_netstorage_get_rsync_command($file) {
  *
  * @see drush_netstorage_get_sync_command()
  */
-function _drush_netstorage_get_rsync_command($filepath, $netstorage_credentials) {
+function _drush_netstorage_get_rsync_command($filename, $netstorage_credentials) {
 
-  $filename = '@todo';
   $rsynch_opts = '-ltgoDzdW --timeout=480';
-  $files_path = '@todo';
 
   $file_info = array(
     '%filename' => $filename,
-    '%files_path' => $files_path,
     '%rsync_options' => $rsynch_opts,
   );
 
