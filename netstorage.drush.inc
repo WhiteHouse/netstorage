@@ -51,9 +51,11 @@ function drush_netstorage_get_scp_command($file) {
     $file = realpath($file);
   }
 
-  // @todo If variables are not stored in settings.php, prompt user to input
-  //   from command line.
-  $netstorage_credentials = variable_get('netstorage_credentials', FALSE);
+  // Make sure variables aren't missing.
+  if (!$netstorage_credentials = variable_get('netstorage_credentials', FALSE);
+    drush_print('Missing netstorage_rsync_variables. See netstorage/README.');
+    return;
+  }
 
   $command = _drush_netstorage_get_scp_command($file, $netstorage_credentials);
   drush_print($command);
@@ -65,7 +67,7 @@ function drush_netstorage_get_scp_command($file) {
  * scp -i /path/to/key/file /path/to/local/file user@host:/path/to/directory
  *
  * @param string $filepath
- *   The path to the file to be updated.
+ *  Absolute path to file.
  *
  * @param array $netstorage_credentials
  *   An array of NetStorage rsync variables containing the follow key-value
