@@ -1,4 +1,6 @@
 <?php
+
 /**
- * @file netstorage.module
+ * @file
+ * Utilities for working with Akamai NetStorage.
  */

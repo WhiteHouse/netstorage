@@ -2,14 +2,11 @@
 
 /**
  * @file
- * Akamai Bulk Upload Cache Clear drush command.
+ * Drush commands for the NetStorage module.
  */
 
 /**
  * Implements hook_drush_command().
- *
- * @return array
- *   An associative array describing your command(s).
  */
 function netstorage_drush_command() {
   $items = array();
@@ -20,8 +17,7 @@ function netstorage_drush_command() {
       'filepath' => 'path/to/file to be synced',
     ),
     'examples' => array(
-      'drush akamai-netstorage-update "/example/something.pdf"' => 'Update sites/default/files/example/something.pdf on NetStorage',
-      'drush anu <filepath>' => '',
+      'drush nsc "/example/something.pdf"' => 'Gets the command to update sites/default/files/example/something.pdf on NetStorage.',
     ),
     'aliases' => array('nsc'),
   );
@@ -40,22 +36,19 @@ function netstorage_drush_help($section) {
 }
 
 /**
- * @param string $file
- *  File name
+ * Implements drush_hook_COMMAND().
  *
- * @return
- *  String. Commands to execute to manually run NetStorage update for a single
- *  file.
+ * @see netstorage_drush_command()
  */
 function drush_netstorage_get_sync_command($file) {
-  // TODO Get absolute path to the file here?
-  // TODO Do some sort of validation?
-  // TODO Throw an error if NetStorage creds aren't available.
-  // TODO Throw and error if NetStorage creds aren't valid.
+  // @todo Get absolute path to the file here?
+  // @todo Do some sort of validation?
+  // @todo Throw an error if NetStorage creds aren't available.
+  // @todo Throw and error if NetStorage creds aren't valid.
   drush_print('NOTE: This is a work in progress. Probably still requires some testing and debugging. See README for instructions on what NetStorage creds need to be stored in settings.php. Then test out the command to make sure it works.');
 
-  // TODO If variables are not stored in settings.php, prompt user to input from
-  //   command line.
+  // @todo If variables are not stored in settings.php, prompt user to input
+  //   from command line.
   $netstorage_rsync_variables = variable_get('netstorage_rsync_variables', FALSE);
 
   $command = _drush_netstorage_get_sync_command($file, $netstorage_rsync_variables);
@@ -63,29 +56,30 @@ function drush_netstorage_get_sync_command($file) {
 }
 
 /**
- * Call this for drush commands updating NetStorage for individual files.
+ * Call this for Drush commands updating NetStorage for individual files.
  *
  * @param string $filepath
- *  File name
+ *   The path to the file to be updated.
  *
  * @param array $netstorage_rsync_variables
- *    $conf['netstorage_rsync_variables'] = array(
- *      '%key_file' => "/private/path/to/netstorage.key",
- *      '%user' => 'myUserName',
- *      '%customer' => 'myCustomer',
- *      '%cp_code' => 'CPCodeProvidedByAkamai',
- *      '%netstorage_upload_path' => 'htdocs/path/to/your/files/directory'
- *    );
+ *   An array of NetStorage rsync variables containing the follow key-value
+ *   pairs:
+ *   - "%key_file": The path to your NetStorage key file.
+ *   - "%user": Your NetStorage username.
+ *   - "%customer": Your NetStorage customer name.
+ *   - "%cp_code": Your CP code provided by Akamai.
+ *   - "%netstorage_upload_path": The Netstorage upload path.
  *
- * @return
- *  String. Commands to execute to manually run NetStorage update for a single
- *  file.
+ * @return string
+ *   Commands to execute to manually run NetStorage update for a single file.
+ *
+ * @see drush_netstorage_get_sync_command()
  */
 function _drush_netstorage_get_sync_command($filepath, $netstorage_rsync_variables) {
-  
-  $filename = 'TODO';
+
+  $filename = '@todo';
   $rsynch_opts = '-ltgoDzdW --timeout=480';
-  $files_path = 'TODO';
+  $files_path = '@todo';
 
   $file_info = array(
     '%filename' => $filename,

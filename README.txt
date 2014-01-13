@@ -1,10 +1,11 @@
-Netstorage
-===========
+NetStorage
+==========
 
 This module helps you sync files up to Akamai NetStorage.
 
 Store your private NetStorage credentials in settings.php like this:
 
+<?php
 $conf['netstorage_rsync_variables'] = array(
   '%key_file' => "/private/path/to/netstorage.key",
   '%user' => 'myUserName',
@@ -12,3 +13,4 @@ $conf['netstorage_rsync_variables'] = array(
   '%cp_code' => 'CPCodeProvidedByAkamai',
   '%netstorage_upload_path' => 'htdocs/path/to/your/files/directory'
 );
+?>
