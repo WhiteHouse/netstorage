@@ -11,7 +11,7 @@
 function netstorage_drush_command() {
   $items = array();
 
-  $items['netstorage-get-rsync-command'] = array(
+  $items['netstorage-get-scp-command'] = array(
     'description' => "Prints a command to manually rsync a single file to Akamai's NetStorage.",
     'arguments' => array(
       'filepath' => 'path/to/file to be synced',
@@ -19,7 +19,7 @@ function netstorage_drush_command() {
     'examples' => array(
       'drush nsc "/example/something.pdf"' => 'Gets the command to update sites/default/files/example/something.pdf on NetStorage.',
     ),
-    'aliases' => array('nsc'),
+    'aliases' => array('nscp'),
   );
 
   return $items;
@@ -30,7 +30,7 @@ function netstorage_drush_command() {
  */
 function netstorage_drush_help($section) {
   switch ($section) {
-    case 'drush:netstorage-get-sync-command':
+    case 'drush:netstorage-get-scp-command':
       return dt("Pass path/to/some/file.example to this script. It will return a command to manually sync this file to NetStorage.");
   }
 }
@@ -40,7 +40,7 @@ function netstorage_drush_help($section) {
  *
  * @see netstorage_drush_command()
  */
-function drush_netstorage_get_rsync_command($file) {
+function drush_netstorage_get_scp_command($file) {
   // Get absolute path to file.
   $file = (substr($file, 0, 1) == '/') ? $file : $_ENV['PWD'] . '/' . $file;
   if (!file_exists($file)) {
@@ -49,19 +49,20 @@ function drush_netstorage_get_rsync_command($file) {
   }
   else {
     $file = realpath($file);
-    drush_print("Now \$file is this $file");
   }
 
   // @todo If variables are not stored in settings.php, prompt user to input
   //   from command line.
   $netstorage_credentials = variable_get('netstorage_credentials', FALSE);
 
-  $command = _drush_netstorage_get_rsync_command($file, $netstorage_credentials);
+  $command = _drush_netstorage_get_scp_command($file, $netstorage_credentials);
   drush_print($command);
 }
 
 /**
  * Call this for Drush commands updating NetStorage for individual files.
+ *
+ * scp -i /path/to/key/file /path/to/local/file user@host:/path/to/directory
  *
  * @param string $filepath
  *   The path to the file to be updated.
@@ -80,19 +81,11 @@ function drush_netstorage_get_rsync_command($file) {
  *
  * @see drush_netstorage_get_sync_command()
  */
-function _drush_netstorage_get_rsync_command($filename, $netstorage_credentials) {
+function _drush_netstorage_get_scp_command($filename, $netstorage_credentials) {
+  $variables = array_merge($netstorage_credentials, array('%filename' => $filename));
 
-  $rsynch_opts = '-ltgoDzdW --timeout=480';
-
-  $file_info = array(
-    '%filename' => $filename,
-    '%rsync_options' => $rsynch_opts,
-  );
-
-  $rsync_vars = array_merge($netstorage_credentials, $file_info);
-
-  // Generate the rsync against the file.
-  $command = strtr("rsync -e 'ssh -qi %key_file' %rsync_options %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $rsync_vars);
+  // Generate the scp command.
+  $command = strtr("scp -i %key_file %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $variables);
 
   return $command;
 }
