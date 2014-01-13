@@ -46,6 +46,16 @@ function drush_netstorage_get_sync_command($file) {
   // @todo Throw an error if NetStorage creds aren't available.
   // @todo Throw and error if NetStorage creds aren't valid.
   drush_print('NOTE: This is a work in progress. Probably still requires some testing and debugging. See README for instructions on what NetStorage creds need to be stored in settings.php. Then test out the command to make sure it works.');
+  // Get absolute path to file.
+  $file = (substr($file, 0, 1) == '/') ? $file : $_ENV['PWD'] . '/' . $file;
+  if (!file_exists($file)) {
+    drush_print('Sorry. This file does not exist: ' . $file);
+    return;
+  }
+  else {
+    $file = realpath($file);
+    drush_print("Now \$file is this $file");
+  }
 
   // @todo If variables are not stored in settings.php, prompt user to input
   //   from command line.
@@ -90,7 +100,7 @@ function _drush_netstorage_get_sync_command($filepath, $netstorage_rsync_variabl
   $rsync_vars = array_merge($netstorage_rsync_variables, $file_info);
 
   // Generate the rsync against the file.
-  $command = strtr("rsync -e 'ssh -qi %key_file' %rsync_options %files_path%filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $rsync_vars);
+  $command = strtr("rsync -e 'ssh -qi %key_file' %rsync_options %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $rsync_vars);
 
   return $command;
 }
