@@ -16,8 +16,12 @@ function netstorage_drush_command() {
     'arguments' => array(
       'filepath' => 'path/to/file to be synced',
     ),
+    'options' => array(
+      'subdir' => 'Subdirectory on NetStorage to push file into' 
+    ),
     'examples' => array(
-      'drush nsc "/example/something.pdf"' => 'Gets the command to update sites/default/files/example/something.pdf on NetStorage.',
+      'drush netstorage-get-scp-command "something.pdf"' => 'If you set %netstorage_upload_path to "htdocs/sites/default/files" in settings.php this command will push your file up to htdocs/sites/default/files/something.pdf on NetStorage.',
+      'drush ngscp "/local/path/to/something.pdf --subdir=example"' => 'Gets the command to update %netstorage_upload_path/example/something.pdf on NetStorage.',
     ),
     'aliases' => array('nscp'),
   );
@@ -51,43 +55,9 @@ function drush_netstorage_get_scp_command($file) {
     $file = realpath($file);
   }
 
-  // Make sure variables aren't missing.
-  if (!$netstorage_credentials = variable_get('netstorage_credentials', FALSE);
-    drush_print('Missing netstorage_rsync_variables. See netstorage/README.');
-    return;
-  }
+  // Get subdir (if one is provided).
+  $subdir = drush_get_option('subdir', '');
 
-  $command = _drush_netstorage_get_scp_command($file, $netstorage_credentials);
+  $command = netstorage_get_scp_command($file, $subdir);
   drush_print($command);
-}
-
-/**
- * Call this for Drush commands updating NetStorage for individual files.
- *
- * scp -i /path/to/key/file /path/to/local/file user@host:/path/to/directory
- *
- * @param string $filepath
- *  Absolute path to file.
- *
- * @param array $netstorage_credentials
- *   An array of NetStorage rsync variables containing the follow key-value
- *   pairs:
- *   - "%key_file": The path to your NetStorage key file.
- *   - "%user": Your NetStorage username.
- *   - "%customer": Your NetStorage customer name.
- *   - "%cp_code": Your CP code provided by Akamai.
- *   - "%netstorage_upload_path": The Netstorage upload path.
- *
- * @return string
- *   Commands to execute to manually run NetStorage update for a single file.
- *
- * @see drush_netstorage_get_sync_command()
- */
-function _drush_netstorage_get_scp_command($filename, $netstorage_credentials) {
-  $variables = array_merge($netstorage_credentials, array('%filename' => $filename));
-
-  // Generate the scp command.
-  $command = strtr("scp -i %key_file %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/", $variables);
-
-  return $command;
 }

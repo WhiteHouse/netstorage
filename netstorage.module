@@ -4,3 +4,69 @@
  * @file
  * Utilities for working with Akamai NetStorage.
  */
+
+/**
+ * Generate scp command to push files up to NetStorage.
+ */
+function netstorage_get_scp_command($filepath, $subdir = '') {
+  // Make sure variables aren't missing.
+  if (!$netstorage_credentials = netstorage_get_credentials()) {
+    throw new Exception('Missing netstorage_credentials.');  
+  }
+
+  // Get SCP command.
+  $command =  _netstorage_get_scp_command($filepath, $netstorage_credentials, $subdir);
+
+  return $command;
+}
+
+/**
+ * Get credentials.
+ *
+ * @return array
+ */
+function netstorage_get_credentials() {
+  // Make sure variables aren't missing.
+  if (!$netstorage_credentials = variable_get('netstorage_credentials', FALSE)) {
+    drupal_set_message('Missing netstorage_credentials. See netstorage/README.', 'error');
+    return;
+  }
+  else {
+    return $netstorage_credentials;  
+  }
+}
+
+/**
+ * Call this for Drush commands updating NetStorage for individual files.
+ *
+ * scp -i /path/to/key/file /path/to/local/file user@host:/path/to/directory
+ *
+ * @param string $filepath
+ *  Absolute path to file.
+ *
+ * @param array $netstorage_credentials
+ *   An array of NetStorage rsync variables containing the follow key-value
+ *   pairs:
+ *   - "%key_file": The path to your NetStorage key file.
+ *   - "%user": Your NetStorage username.
+ *   - "%customer": Your NetStorage customer name.
+ *   - "%cp_code": Your CP code provided by Akamai.
+ *   - "%netstorage_upload_path": The Netstorage upload path.
+ *
+ * @param string $subdir
+ *   (optional) Subdirectory inside top-level directory to scp up to.
+ *
+ * @return string
+ *   Commands to execute to manually run NetStorage update for a single file.
+ *
+ * @see drush_netstorage_get_sync_command()
+ */
+function _netstorage_get_scp_command($filename, $netstorage_credentials, $subdir = '') {
+  $variables = array_merge($netstorage_credentials, array('%filename' => $filename,
+                                                          '%subdir' => $subdir));
+
+  // Generate the scp command.
+  $command = strtr("scp -i %key_file %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/%subdir", $variables);
+
+  return $command;
+}
