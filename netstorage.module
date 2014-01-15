@@ -6,6 +6,58 @@
  */
 
 /**
+ * Implements hook_cron_queue_info().
+ */
+function netstorage_cron_queue_info() {
+  $queues['netstorage_upload'] = array(
+    'worker callback' => 'netstorage_upload',
+    'time' => 60,
+    'skip on cron' => TRUE,
+  );
+  return $queues;
+}
+
+/**
+ * Implements hook_tweetfetch().
+ *
+ * Queues upload tasks.
+ */
+function netstorage_tweetfetch($filepath) {
+  $data = new stdClass();
+  $data->filepath = $filepath;
+  $data->subdir = 'tweets';
+
+  $queue = DrupalQueue::get('netstorage_upload');
+  $queue->createQueue();
+  $queue->createItem($data);
+}
+
+/**
+ * Worker callback for netstorage_upload queue in hook_cron_queue_info.
+ *
+ * @param obj $upload
+ *  - filepath, absolute path to file
+ *  - subdir, subdirectory on netstorage
+ */
+function netstorage_upload($upload) {
+  if (!drupal_is_cli()) {
+    drupal_set_message('Sorry. This netstorage_upload can only be run via `drush queue-run netstorage_upload`.', 'error');
+    return;
+  }
+
+  // Get upload command.
+  $command = netstorage_get_scp_command($upload->filepath, $upload->subdir);
+  $command .= ' 2>&1';
+  watchdog('netstorage_upload', "Running: {$command}");
+  $output = shell_exec($command);
+  watchdog('netstorage_upload', "Output: {$output}");
+
+  // @todo Once this runs, Drupal has already removed this item from the queue.
+  //    Re-queue item here if upload fails.
+
+}
+
+/**
  * Generate scp command to push files up to NetStorage.
  */
 function netstorage_get_scp_command($filepath, $subdir = '') {

@@ -14,3 +14,5 @@ $conf['netstorage_rsync_variables'] = array(
   '%netstorage_upload_path' => 'htdocs/path/to/your/files/directory'
 );
 ?>
+
+If you have tweetfetch (included in tweetserver profile) installed, this module queues jobs for pushing static json tweet files up to netstorage. Process the queue with `drush queue-run netstorage_upload`.
