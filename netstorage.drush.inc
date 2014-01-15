@@ -26,6 +26,19 @@ function netstorage_drush_command() {
     'aliases' => array('nscp'),
   );
 
+  $items['netstorage-queue-run'] = array(
+    'description' => "Wrapper around drush queue-run to add delay.",
+    'arguments' => array(
+      'queue_name' => 'Presumably you would use "netstorage_upload", but you can technically use this for any queue.',
+    ),
+    'options' => array(
+      'delay' => 'Seconds to wait before executing command. (Handy for staggering multiple cron jobs all running in the same minute.)',
+    ),
+    'examples' => array(
+      'drush netstorage-queue-run netstorage_upload --delay=15' => 'Wait 15 seconds, then execute this command.',
+    ),
+  );
+
   return $items;
 }
 
@@ -60,4 +73,17 @@ function drush_netstorage_get_scp_command($file) {
 
   $command = netstorage_get_scp_command($file, $subdir);
   drush_print($command);
+}
+
+/**
+ * Callback for netstorage-queue-run. Wrapper around drush queue-run.
+ */
+function drush_netstorage_queue_run_command($queue_name) {
+  if ($seconds = drush_get_option('delay', 0)) {
+    // Delay is used to stagger multiple drush commands running on cron in the same minute.  
+    sleep($seconds);
+  }
+
+  $command = "drush queue-run {$queue_name}";
+  shell_exec($command);
 }
