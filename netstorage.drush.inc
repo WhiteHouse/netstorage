@@ -91,5 +91,6 @@ function drush_netstorage_queue_run($queue_name) {
 
   // Execute the command.
   $command = "{$drush} queue-run {$queue_name}";
+  watchdog('drush netstorage-queue-run', "Running: {$command}");
   shell_exec($command);
 }
