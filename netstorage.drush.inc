@@ -82,6 +82,7 @@ function drush_netstorage_get_scp_command($file) {
 function drush_netstorage_queue_run($queue_name) {
   if ($seconds = drush_get_option('delay', 0)) {
     // Delay is used to stagger multiple drush commands running on cron in the same minute.  
+    watchdog('drush netstorage-queue-run', "Wait {$seconds} seconds");
     sleep($seconds);
   }
 
