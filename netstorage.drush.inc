@@ -33,6 +33,7 @@ function netstorage_drush_command() {
     ),
     'options' => array(
       'delay' => 'Seconds to wait before executing command. (Handy for staggering multiple cron jobs all running in the same minute.)',
+      'path-to-drush' => 'If you have different versions of drush on your machine (e.g. Acquia Cloud) you can specify the path to drush here.',
     ),
     'examples' => array(
       'drush netstorage-queue-run netstorage_upload --delay=15' => 'Wait 15 seconds, then execute this command.',
@@ -84,6 +85,10 @@ function drush_netstorage_queue_run($queue_name) {
     sleep($seconds);
   }
 
-  $command = "drush queue-run {$queue_name}";
+  // Sepecify which drush to use. User can optionally give path to drush on server.
+  $drush = drush_get_option('path-to-drush', 'drush');
+
+  // Execute the command.
+  $command = "{$drush} queue-run {$queue_name}";
   shell_exec($command);
 }
