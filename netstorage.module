@@ -118,7 +118,14 @@ function _netstorage_get_scp_command($filename, $netstorage_credentials, $subdir
                                                           '%subdir' => $subdir));
 
   // Generate the scp command.
-  $command = strtr("scp -i %key_file %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/%subdir", $variables);
+  if ($destination = variable_get('netstorage_test_destination', FALSE)) {
+    // This is a test. We're not actually scp-ing the file up to NetStorage.
+    $command = "scp {$filename} {$destination}";
+    drupal_set_message('netstorage', 'NOTE: This is a test destination. To upload to NetStorage using credentials in settings.php run `drush netstorage-unset-test-destination`');
+  }
+  else {
+    $command = strtr("scp -i %key_file %filename %user@%customer.upload.akamai.com:/%cp_code/%netstorage_upload_path/%subdir", $variables);
+  }
 
   return $command;
 }

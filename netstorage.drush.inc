@@ -26,6 +26,27 @@ function netstorage_drush_command() {
     'aliases' => array('nscp'),
   );
 
+  $items['netstorage-set-test-destination'] = array(
+    'description' => "Overrides SCP destination based on netstorage_credentials in settings.php for testing. NOTE: This assumes you to NOT need to use a key file to verify your identity (scp -i ). (This is set here as a variable, not passed somewhere as an option so that the command can still be executed by processing the netstorage_upload queue using drush queue-run.)",
+    'arguments' => array(
+      'destination' => 'username@host.com:/path/to/destination/directory',
+    ),
+    'examples' => array(
+      'drush netstorage-set-test-destination "example@myserver.com:/home/example"' => '',
+      'drush nstd "example@myserver.com:/home/example"' => '',
+    ),
+    'aliases' => array('nstd'),
+  );
+
+  $items['netstorage-unset-test-destination'] = array(
+    'description' => "Unset test SCP destination.",
+    'examples' => array(
+      'drush netstorage-unset-test-destination' => '',
+      'drush nutd' => '',
+    ),
+    'aliases' => array('nutd'),
+  );
+
   $items['netstorage-queue-run'] = array(
     'description' => "Wrapper around drush queue-run to add delay.",
     'arguments' => array(
@@ -93,4 +114,18 @@ function drush_netstorage_queue_run($queue_name) {
   $command = "{$drush} queue-run {$queue_name}";
   watchdog('drush netstorage-queue-run', "Running: {$command}");
   shell_exec($command);
+}
+
+/**
+ * Set test SCP destination.
+ */
+function drush_netstorage_set_test_destination($destination) {
+  variable_set('netstorage_test_destination', $destination);
+}
+
+/**
+ * Unset test SCP destination.
+ */
+function drush_netstorage_unset_test_destination() {
+  variable_set('netstorage_test_destination', '');
 }
