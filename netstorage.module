@@ -43,6 +43,7 @@ function netstorage_tweetfetch_reset($paths) {
   }
 
   try {
+    module_load_include('inc', 'akamai', 'akamai.class');
     $akamai = new AkamaiCacheControlClient();
     $akamai->clear_url($paths);
   }
