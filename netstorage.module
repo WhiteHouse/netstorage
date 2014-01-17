@@ -44,13 +44,25 @@ function netstorage_upload($upload) {
     drupal_set_message('Sorry. This netstorage_upload can only be run via `drush queue-run netstorage_upload`.', 'error');
     return;
   }
+  else {
+    $context = drush_get_context($context);
+    $is_verbose = $context['DRUSH_VERBOSE'];
+  }
 
   // Get upload command.
   $command = netstorage_get_scp_command($upload->filepath, $upload->subdir);
   $command .= ' 2>&1';
-  watchdog('netstorage_upload', "Running: {$command}");
+
+  // Execute.
+  $message = "Running: {$command}";
+  watchdog('netstorage_upload', $message);
+  if (!$is_verbose) drupal_set_message($message);
   $output = shell_exec($command);
-  watchdog('netstorage_upload', "Output: {$output}");
+
+  // Report output.
+  $message = "Output: {$output}";
+  watchdog('netstorage_upload', $message);
+  if (!$is_verbose) drupal_set_message($message);
 
   // @todo Once this runs, Drupal has already removed this item from the queue.
   //    Re-queue item here if upload fails.
