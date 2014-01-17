@@ -33,6 +33,25 @@ function netstorage_tweetfetch($filepath) {
 }
 
 /**
+ * Implements hook_tweetfetch_reset().
+ *
+ * Refresh Akamai cache on reset.
+ */
+function netstorage_tweetfetch_reset($paths) {
+  if (!is_array($paths)) {
+    $paths = array($paths);
+  }
+
+  try {
+    $akamai = new AkamaiCacheControlClient();
+    $akamai->clear_url($paths);
+  }
+  catch(Exception $e) {
+    watchdog('netstorage_upload', 'Could not clear Akamai cache', WATCHDOD_ERRORs);
+  }
+}
+
+/**
  * Worker callback for netstorage_upload queue in hook_cron_queue_info.
  *
  * @param obj $upload
