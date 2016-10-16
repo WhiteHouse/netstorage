@@ -107,7 +107,7 @@ function drush_netstorage_queue_run($queue_name) {
     sleep($seconds);
   }
 
-  // Sepecify which drush to use. User can optionally give path to drush on server.
+  // Specify which drush to use. User can optionally give path to drush on server.
   $drush = drush_get_option('path-to-drush', 'drush');
 
   // Execute the command.
